@@ -12,8 +12,9 @@ get '/game' do
   erb :game
 end
 
-get '/choice' do
-  session[:player_choice] =[]
+post '/choice' do
+  session[:player_choice] = []
+  params[:player_choice] << session[:player_choice]
   redirect '/game'
 end
 
@@ -21,6 +22,6 @@ end
 # Pseudocode
 
 # store selection from user in hash, which is stored in session and increases >>
-# display images (no image, x image, o image) according to hash
 # define winning conditions
-# automatically have computer select one after use chose (with sample method)
+# automatically have computer select one after user chose (with sample method)
+# display images (no image, x image, o image) according to hash
