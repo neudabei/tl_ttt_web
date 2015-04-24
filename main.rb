@@ -3,12 +3,16 @@ require 'pry'
 
 set :sessions, true
 
+WINNING_COMBINATIONS = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
+
 helpers do
     def check_winner(player_choices, computer_choices) # pass in when calling method (session[:player_choice], session[:computer_choice]) 
-      if player_choices == [1,2,3] || player_choices == [4,5,6] || player_choices == [7,8,9] || player_choices == [1,4,7] || player_choices == [2,5,8] || player_choices == [3,6,9] || player_choices == [1,5,9] || player_choices == [3,5,7]
+      if WINNING_COMBINATIONS.include?(player_choices) 
         @success = "Player won!" 
-      elsif computer_choices == [1,2,3] || computer_choices == [4,5,6] || computer_choices == [7,8,9] || computer_choices == [1,4,7] || computer_choices == [2,5,8] || computer_choices == [3,6,9] || computer_choices == [1,5,9] || computer_choices == [3,5,7] 
+      elsif WINNING_COMBINATIONS.include?(computer_choices)
         @error = "Computer won!"
+      elsif session[:available_choices].empty?
+        @success = "It's a tie. There are no more available fields."
       end
     end
 end
@@ -18,25 +22,36 @@ get '/' do
 end
 
 get '/game' do
+  session[:available_choices] = [1,2,3,4,5,6,7,8,9]
+  session[:player_choice] = []
+  session[:computer_choice] = []
   erb :game
 end
 
 post '/choice' do
-  session[:player_choice] = []
-  session[:computer_choice] = []
-  session[:player_choice] << params[:player_choice]
-  # session[:computer_choice] << (1..9).sample
-
+  session[:player_choice] << params[:player_choice].to_i
+  session[:available_choices].delete_at(params[:player_choice].to_i - 1) # take selected number from player out of available_choices
+  check_winner(session[:player_choice],session[:computer_choice])
+  computer_selection = session[:available_choices].sample # store computer_selection in local variable before passing it into array, so I can use the variable to also take it out of the available_choices array 
+  session[:computer_choice] << computer_selection
+  session[:available_choices].delete_at(computer_selection - 2) # take selected number from computer out of available_choices
   check_winner(session[:player_choice],session[:computer_choice])
 
   # binding.pry
-  redirect '/game'
+  erb :game
 end
 
 
 # Pseudocode
 
-# store selection from user in array, which is stored in session and increases with each click
-# computer makes choice automatically based on sample/randomize method and also stores in array
-# check winner (based on defined winning conditions)
-# display images (no image, x image, o image) according to array content (1,2 || 1,2,3 ...)
+# show all images from session[:available_choices] as blank images
+# show all images from session[:computer_choice] as O images
+# show all images from session[:player_choice] as X images
+
+    # Code to check if field is taken
+    # if session[:player_choice].include?(session[:available_choices])
+    #   next
+    # else 
+    #   @error = "This field is taken. You can only choose between the available fields"
+    #   halt erb :game
+    # end
