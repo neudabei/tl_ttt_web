@@ -3,7 +3,7 @@ require 'pry'
 
 set :sessions, true
 
-WINNING_COMBINATIONS = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
+WINNING_COMBINATIONS = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7], [3,2,1], [6,5,4], [9,8,7], [7,4,1], [8,5,2], [9,6,3], [9,5,1], [7,5,3], [2,3,1], [5,4,6], [8,7,9], [4,1,7], [5,2,8], [6,3,9], [5,1,9], [5,3,7], [1,3,2], [4,6,5], [7,9,8], [1,7,4], [2,8,5], [3,9,6], [1,9,5], [3,7,5]]
 
 helpers do
     def check_winner(player_choices, computer_choices) # pass in when calling method (session[:player_choice], session[:computer_choice]) 
@@ -13,8 +13,24 @@ helpers do
         @error = "Computer won!"
       elsif session[:available_choices].empty?
         @success = "It's a tie. There are no more available fields."
+      else
+        nil
       end
     end
+
+  def image_output(num)
+    if session[:player_choice].include?(num)
+    "<form id='image_squares' action='/choice' method='post'>
+                      <td><input type='hidden' name='player_choice' value='#{num}'> <input type='image' src='images/x.png'></td></form>"
+    elsif session[:computer_choice].include?(num)
+    "<form id='image_squares' action='/choice' method='post'>
+                      <td><input type='hidden' name='player_choice' value='#{num}'> <input type='image' src='images/o.png'></td></form>"
+    else
+    "<form id='image_squares' action='/choice' method='post'>
+                      <td><input type='hidden' name='player_choice' value='#{num}'> <input type='image' src='images/nil.png'></td></form>"
+    end
+  end
+
 end
 
 get '/' do
